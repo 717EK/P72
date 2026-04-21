@@ -1,0 +1,118 @@
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 18px;
+  border-bottom: 2px solid var(--fg);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  min-height: var(--top-h);
+}
+
+.top-l {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.top-brand {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  line-height: 1;
+}
+.top-sub {
+  font-size: 9px;
+  color: var(--mute);
+  letter-spacing: 0.25em;
+  font-weight: 700;
+}
+
+.top-r {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.top-day {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--ok);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.top-meta {
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.top-date {
+  font-size: 9px;
+  color: var(--mute);
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+.top-clock {
+  font-size: 11px;
+  color: var(--fg);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.top-menu-wrap { position: relative; }
+.top-menu-btn {
+  width: 40px;
+  height: 40px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line-hi);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.top-menu-btn:hover { border-color: var(--ok); }
+.top-menu-btn span {
+  width: 16px;
+  height: 2px;
+  background: var(--fg);
+  display: block;
+}
+.top-menu-btn:hover span { background: var(--ok); }
+
+.top-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--bg-panel);
+  border: 1px solid var(--fg);
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  z-index: 60;
+}
+.top-menu button {
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  transition: all 0.1s;
+  border-bottom: 1px solid var(--line);
+}
+.top-menu button:last-child { border-bottom: none; }
+.top-menu button:hover { background: var(--ok); color: #000; }
+.top-menu button.danger:hover { background: var(--bad); color: #fff; }
+
+@media (min-width: 700px) {
+  .top-meta { display: flex; }
+}

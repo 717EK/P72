@@ -1,0 +1,25 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line-hi);
+  padding: 14px 18px;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.1s;
+  color: var(--fg);
+  min-height: 48px;
+}
+.btn:hover:not(:disabled) { border-color: var(--ok); color: var(--ok); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-full { width: 100%; }
+
+.btn-primary:hover:not(:disabled) { background: var(--ok); color: #000; border-color: var(--ok); }
+.btn-danger:hover:not(:disabled) { background: var(--bad); color: #fff; border-color: var(--bad); }
+.btn-info:hover:not(:disabled) { background: var(--info); color: #000; border-color: var(--info); }

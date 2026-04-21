@@ -1,0 +1,43 @@
+.charts {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-bottom: 1px solid var(--line);
+}
+
+.chart-wrap {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.chart-wrap:last-child { border-bottom: none; }
+
+.chart-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+.chart-t {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.25em;
+}
+.chart-tag {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+}
+
+.chart-box {
+  height: 130px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.chart-svg { width: 100%; height: 100%; display: block; }
+
+@media (min-width: 900px) {
+  .charts { grid-template-columns: 1fr 1fr; }
+  .chart-wrap { border-bottom: none; border-right: 1px solid var(--line); }
+  .chart-wrap:last-child { border-right: none; }
+}
