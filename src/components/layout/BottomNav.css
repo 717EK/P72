@@ -44,6 +44,25 @@
   background: var(--ok);
 }
 
+/* Attention dot — subtle pulsing amber, only visible when a tab has unfinished work */
+.bnav-dot {
+  position: absolute;
+  top: 10px;
+  right: calc(50% - 34px);
+  width: 6px;
+  height: 6px;
+  background: var(--warn);
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(255, 204, 0, 0.6);
+  animation: bnav-dot-pulse 2s ease-in-out infinite;
+}
+.bnav-tab.is-active .bnav-dot { display: none; }
+
+@keyframes bnav-dot-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+
 @media (min-width: 900px) {
   .bnav {
     position: sticky;

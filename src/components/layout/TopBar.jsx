@@ -129,6 +129,14 @@ export default function TopBar() {
           style={{ display: 'none' }}
         />
       </div>
+
+      {/* Progression bar — fills from 0 to 100% across 120 days. Always visible. */}
+      <div className="top-progress" aria-hidden="true">
+        <div
+          className="top-progress-fill"
+          style={{ width: `${Math.min(100, (dayNum / 120) * 100)}%` }}
+        />
+      </div>
     </header>
   );
 }

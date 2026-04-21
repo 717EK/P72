@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useAppStore } from '../../store/useAppStore';
 import { scoreDay } from '../../utils/scoring';
+import { calorieWindow, slotBudgets, proteinTargetG, ageFrom } from '../../utils/health';
 import ComplianceRing from './ComplianceRing';
 import TransformationMatrix from './TransformationMatrix';
 import DataCharts from './DataCharts';
@@ -9,20 +11,53 @@ import StatGrid from './StatGrid';
 import DayRecapModal from '../layout/DayRecapModal';
 import './DashView.css';
 
+// Stagger children on enter — 40ms between each section, subtle 6px rise.
+const container = {
+  hidden: { opacity: 1 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.04, delayChildren: 0.02 }
+  }
+};
+const item = {
+  hidden: { opacity: 0, y: 6 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } }
+};
+
 export default function DashView() {
   const day = useAppStore((s) => s.getCurrentDay());
   const dayNum = useAppStore((s) => s.currentDayNumber());
+  const profile = useAppStore((s) => s.profile);
   const [recapKey, setRecapKey] = useState(null);
-  const sc = scoreDay(day);
+
+  const scoreOptions = useMemo(() => {
+    const age = ageFrom(profile?.dob);
+    const pForWindow = {
+      sex: profile?.sex, weightKg: profile?.startWeightKg,
+      heightCm: profile?.heightCm, ageYears: age,
+      activity: profile?.activity, intensity: profile?.intensity
+    };
+    return {
+      slotBudgets: slotBudgets(pForWindow),
+      proteinTarget: proteinTargetG({ weightKg: profile?.startWeightKg })
+    };
+  }, [profile]);
+
+  const sc = scoreDay(day, scoreOptions);
 
   return (
-    <section className="dash">
-      <div className="section-title">
+    <motion.section
+      className="dash"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={item} className="section-title">
         <span>DASH // COMMAND</span>
         <span className="tag">LIVE</span>
-      </div>
+      </motion.div>
 
-      <div className="dash-hero">
+      <motion.div variants={item} className="dash-hero">
         <ComplianceRing
           pct={sc.pct}
           label={`DAY ${String(dayNum).padStart(3, '0')}`}
@@ -41,17 +76,14 @@ export default function DashView() {
             {sc.pct === 0 && 'Begin logging. Time is the weapon.'}
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <StatGrid />
-
-      <TransformationMatrix onDayClick={(k) => setRecapKey(k)} />
-
-      <DataCharts />
-
-      <MilestoneTimeline />
+      <motion.div variants={item}><StatGrid /></motion.div>
+      <motion.div variants={item}><TransformationMatrix onDayClick={(k) => setRecapKey(k)} /></motion.div>
+      <motion.div variants={item}><DataCharts /></motion.div>
+      <motion.div variants={item}><MilestoneTimeline /></motion.div>
 
       {recapKey && <DayRecapModal dayKey={recapKey} onClose={() => setRecapKey(null)} />}
-    </section>
+    </motion.section>
   );
 }

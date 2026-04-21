@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { kcalForSlot, proteinForSlot } from '../../utils/scoring';
 import MealPickerSheet from './MealPickerSheet';
@@ -12,17 +12,31 @@ export default function MealSlotCard({ slot, title, budget }) {
   const clearMealSlot = useAppStore((s) => s.clearMealSlot);
 
   const [open, setOpen] = useState(false);
+  const [flash, setFlash] = useState(false);
+  const wasInRange = useRef(false);
 
   const kc = kcalForSlot(day, slot);
   const p = proteinForSlot(day, slot);
   const pct = budget?.center ? Math.min(120, Math.round((kc / budget.center) * 100)) : 0;
 
-  // Tone for the ring + bar
   let tone = '';
   if (kc === 0) tone = '';
   else if (budget && kc >= budget.lo && kc <= budget.hi) tone = 'ok';
   else if (budget && kc < budget.lo) tone = 'warn';
   else if (budget && kc > budget.hi) tone = 'bad';
+
+  // Trigger a one-shot green flash when the slot first enters its kcal window.
+  useEffect(() => {
+    const inRange = budget && kc > 0 && kc >= budget.lo && kc <= budget.hi;
+    if (inRange && !wasInRange.current) {
+      setFlash(true);
+      if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+      const t = setTimeout(() => setFlash(false), 700);
+      wasInRange.current = true;
+      return () => clearTimeout(t);
+    }
+    if (!inRange) wasInRange.current = false;
+  }, [kc, budget]);
 
   const bump = (id, qty, delta) => {
     const next = +(qty + delta).toFixed(2);
@@ -31,7 +45,7 @@ export default function MealSlotCard({ slot, title, budget }) {
   };
 
   return (
-    <div className={`slot tone-${tone}`}>
+    <div className={`slot tone-${tone}${flash ? ' is-flash' : ''}`}>
       <div className="slot-hdr">
         <div className="slot-hdr-l">
           <div className="slot-t">{title}</div>

@@ -1,0 +1,104 @@
+.fh {
+  padding: 14px 18px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.fh-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.fh-tag {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: var(--mute);
+  padding: 4px 8px;
+  border: 1px solid var(--line-hi);
+  text-transform: uppercase;
+}
+.fh-tag-int {
+  color: var(--info);
+  border-color: var(--info);
+}
+
+.fh-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0;
+}
+.fh-row:first-of-type { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 2px; }
+
+.fh-row-l {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.fh-row-lbl {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: var(--mute);
+}
+.fh-row-v {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--fg);
+}
+.fh-row-v.tone-ok   { color: var(--ok); }
+.fh-row-v.tone-warn { color: var(--warn); }
+.fh-row-v.tone-bad  { color: var(--bad); }
+.fh-row-v-s {
+  font-size: 10px;
+  color: var(--mute);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.fh-row-r {
+  position: relative;
+}
+.fh-bar {
+  position: relative;
+  height: 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line-hi);
+  overflow: hidden;
+}
+.fh-bar-fill {
+  position: absolute;
+  left: 0; top: 0;
+  height: 100%;
+  background: var(--line-hi);
+  transition: width 0.35s ease-out;
+  z-index: 2;
+}
+.fh-bar-fill.tone-ok   { background: var(--ok); }
+.fh-bar-fill.tone-warn { background: var(--warn); }
+.fh-bar-fill.tone-bad  { background: var(--bad); }
+.fh-bar-over {
+  position: absolute;
+  right: 0; top: 0;
+  height: 100%;
+  background: var(--bad);
+  opacity: 0.75;
+  transition: width 0.35s ease-out;
+  z-index: 3;
+}
+/* Translucent target-band overlay — at 50% center, ±15% spread */
+.fh-bar-mark {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-left: 1px dashed rgba(255,255,255,0.15);
+  border-right: 1px dashed rgba(255,255,255,0.15);
+  background: rgba(57, 255, 20, 0.06);
+  z-index: 1;
+  pointer-events: none;
+}

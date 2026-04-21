@@ -169,7 +169,15 @@ export default function MealPickerSheet({ slot, open, onClose }) {
               const isFav = mealPrefs.favorites.includes(m.id);
               return (
                 <div key={m.id} className="mps-row">
-                  <button className="mps-row-body" onClick={() => onPick(m)}>
+                  <button className="mps-row-body" onClick={() => {
+                    onPick(m);
+                    // Brief visual confirmation — add 'just-added' class that auto-clears
+                    const el = document.getElementById(`mps-${m.id}`);
+                    if (el) {
+                      el.classList.add('just-added');
+                      setTimeout(() => el.classList.remove('just-added'), 450);
+                    }
+                  }} id={`mps-${m.id}`}>
                     <div className="mps-row-l">
                       <div className="mps-row-t">{m.name}</div>
                       <div className="mps-row-d">{m.detail}{m.custom ? ' · CUSTOM' : ''}</div>

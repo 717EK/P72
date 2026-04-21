@@ -8,6 +8,20 @@
 .slot.tone-warn { border-left-color: var(--warn); }
 .slot.tone-bad  { border-left-color: var(--bad); }
 
+/* Success flash — when the slot newly lands within its kcal window */
+.slot.is-flash {
+  animation: slot-flash 700ms ease-out;
+}
+@keyframes slot-flash {
+  0%   { box-shadow: inset 0 0 0 0 rgba(57,255,20,0); }
+  30%  { box-shadow: inset 0 0 0 2px rgba(57,255,20,0.9), 0 0 18px rgba(57,255,20,0.5); }
+  100% { box-shadow: inset 0 0 0 0 rgba(57,255,20,0); }
+}
+
+/* Press-scale on the add button for tactile feel */
+.slot-add:active { transform: scale(0.985); }
+.slot-qty-b:active { transform: scale(0.92); }
+
 .slot-hdr {
   display: flex;
   justify-content: space-between;

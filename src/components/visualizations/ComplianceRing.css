@@ -4,19 +4,39 @@
   height: 144px;
   flex-shrink: 0;
 }
-.ring-svg { width: 100%; height: 100%; display: block; }
+.ring-svg { width: 100%; height: 100%; display: block; position: relative; z-index: 1; }
 .ring-track { fill: none; stroke: var(--line); stroke-width: 6; }
 .ring-bar {
   fill: none;
   stroke-width: 6;
   stroke-linecap: butt;
-  transition: stroke-dashoffset 0.4s ease-out;
+  /* Arc transition is driven by rAF now, not CSS */
 }
 
-.ring-ok .ring-bar { stroke: var(--ok); }
+.ring-ok .ring-bar   { stroke: var(--ok); filter: drop-shadow(0 0 3px rgba(57,255,20,0.35)); }
 .ring-warn .ring-bar { stroke: var(--warn); }
-.ring-bad .ring-bar { stroke: var(--bad); }
-.ring-dim .ring-bar { stroke: var(--dim); }
+.ring-bad .ring-bar  { stroke: var(--bad); }
+.ring-dim .ring-bar  { stroke: var(--dim); }
+
+/* Milestone pulse — single burst animation, fires when key changes */
+.ring-pulse {
+  position: absolute;
+  inset: -4px;
+  border: 2px solid transparent;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1);
+  animation: ring-pulse 850ms ease-out forwards;
+  z-index: 0;
+}
+.ring-pulse-ok   { border-color: var(--ok); box-shadow: 0 0 16px rgba(57,255,20,0.45); }
+.ring-pulse-warn { border-color: var(--warn); }
+.ring-pulse-bad  { border-color: var(--bad); }
+
+@keyframes ring-pulse {
+  0%   { opacity: 0.9; transform: scale(0.92); }
+  100% { opacity: 0;   transform: scale(1.18); }
+}
 
 .ring-inner {
   position: absolute;
@@ -27,6 +47,7 @@
   justify-content: center;
   text-align: center;
   gap: 2px;
+  z-index: 2;
 }
 .ring-pct {
   font-size: 34px;
@@ -36,9 +57,9 @@
   letter-spacing: -0.02em;
 }
 .ring-pct span { font-size: 14px; margin-left: 2px; color: var(--mute); font-weight: 700; }
-.ring-ok .ring-pct { color: var(--ok); }
+.ring-ok .ring-pct   { color: var(--ok); text-shadow: 0 0 12px rgba(57,255,20,0.4); }
 .ring-warn .ring-pct { color: var(--warn); }
-.ring-bad .ring-pct { color: var(--bad); }
+.ring-bad .ring-pct  { color: var(--bad); }
 
 .ring-lbl {
   font-size: 9px;

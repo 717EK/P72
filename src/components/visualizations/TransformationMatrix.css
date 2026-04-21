@@ -67,6 +67,29 @@
   padding: 2px 0;
 }
 .mx-wlbl.is-ms { color: var(--warn); border-bottom-color: var(--warn); }
+.mx-wlbl.is-cur {
+  background: var(--bg-elev);
+  color: var(--ok);
+  border-bottom-color: var(--ok);
+  font-weight: 900;
+}
+.mx-wlbl.is-cur .mx-wn { color: var(--ok); }
+/* Month-boundary divider — thicker left border on every 4th column */
+.mx-wlbl.is-mboundary,
+.mx-cell.is-mboundary {
+  margin-left: 4px;
+  position: relative;
+}
+.mx-wlbl.is-mboundary::before,
+.mx-cell.is-mboundary::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line-hi);
+}
 .mx-wn { font-size: 9px; letter-spacing: 0.1em; }
 .mx-wm { font-size: 8px; margin-top: 1px; }
 
@@ -99,10 +122,22 @@
 .tier-fail { background: var(--bad); color: #fff; border-color: var(--bad); }
 .mx-cell.is-void { background: transparent; border-color: transparent; cursor: default; pointer-events: none; }
 
+/* Today's cell — pulsing neon border so you always know where you are */
 .mx-cell.is-today {
-  outline: 2px solid var(--info);
+  outline: 2px solid var(--ok);
   outline-offset: -2px;
   z-index: 3;
+  animation: mx-today-pulse 2s ease-in-out infinite;
+}
+@keyframes mx-today-pulse {
+  0%, 100% {
+    outline-color: var(--ok);
+    box-shadow: 0 0 0 0 rgba(57, 255, 20, 0);
+  }
+  50% {
+    outline-color: var(--ok);
+    box-shadow: 0 0 0 3px rgba(57, 255, 20, 0.35);
+  }
 }
 .mx-cell-n { pointer-events: none; }
 

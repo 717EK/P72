@@ -44,6 +44,7 @@ export default function TransformationMatrix({ onDayClick }) {
   }, [todayIdx]);
 
   const milestoneForWeek = (w) => MILESTONES.find((m) => m.wk === w);
+  const currentWeek = Math.min(17, Math.floor(todayIdx / 7)); // 0-indexed week column
 
   return (
     <div className="mx-wrap">
@@ -63,8 +64,11 @@ export default function TransformationMatrix({ onDayClick }) {
           {Array.from({ length: COLS }).map((_, c) => {
             const wk = c + 1;
             const ms = milestoneForWeek(wk);
+            const isCur = c === currentWeek;
+            // Every 4 weeks = approximate month boundary (start of W05, W09, W13, W17)
+            const isMonthBoundary = c > 0 && c % 4 === 0;
             return (
-              <div key={`wlbl-${c}`} className={`mx-wlbl${ms ? ' is-ms' : ''}`}>
+              <div key={`wlbl-${c}`} className={`mx-wlbl${ms ? ' is-ms' : ''}${isCur ? ' is-cur' : ''}${isMonthBoundary ? ' is-mboundary' : ''}`}>
                 <div className="mx-wn">W{String(wk).padStart(2, '0')}</div>
                 {ms && <div className="mx-wm">★</div>}
               </div>
@@ -75,8 +79,9 @@ export default function TransformationMatrix({ onDayClick }) {
             Array.from({ length: COLS }).map((_, c) => {
               const idx = c * ROWS + r;
               const k = `cell-${r}-${c}`;
+              const isMonthBoundary = c > 0 && c % 4 === 0;
               if (idx >= TOTAL_DAYS) {
-                return <div key={k} className="mx-cell is-void" />;
+                return <div key={k} className={`mx-cell is-void${isMonthBoundary ? ' is-mboundary' : ''}`} />;
               }
               const cellDate = addDays(parseKey(startDate), idx);
               const ck = dateKey(cellDate);
@@ -89,7 +94,7 @@ export default function TransformationMatrix({ onDayClick }) {
               return (
                 <button
                   key={k}
-                  className={`mx-cell tier-${tier}${isToday ? ' is-today' : ''}`}
+                  className={`mx-cell tier-${tier}${isToday ? ' is-today' : ''}${isMonthBoundary ? ' is-mboundary' : ''}`}
                   onClick={() => onDayClick && onDayClick(ck)}
                   title={`Day ${idx + 1} · ${ck}`}
                   aria-label={`Day ${idx + 1}`}

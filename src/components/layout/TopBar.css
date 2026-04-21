@@ -113,6 +113,24 @@
 .top-menu button:hover { background: var(--ok); color: #000; }
 .top-menu button.danger:hover { background: var(--bad); color: #fff; }
 
+/* Day-progression bar across the bottom of the top bar */
+.top-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;       /* sit flush with the 2px bottom border */
+  height: 2px;
+  background: var(--line);
+  z-index: 51;
+  overflow: hidden;
+}
+.top-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ok-lo), var(--ok));
+  box-shadow: 0 0 6px rgba(57, 255, 20, 0.5);
+  transition: width 0.5s ease-out;
+}
+
 @media (min-width: 700px) {
   .top-meta { display: flex; }
 }
