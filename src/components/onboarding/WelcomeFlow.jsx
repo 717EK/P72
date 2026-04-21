@@ -7,16 +7,19 @@ import {
   ACTIVITY_FACTORS, SEX_OPTIONS, bmr, tdee, bmi, bmiTier, ageFrom,
   calorieWindow, proteinTargetG, ftInToCm, lbsToKg
 } from '../../utils/health';
+import { INTENSITY_OPTIONS, DIET_TYPES } from '../../data/indianMeals';
 import './WelcomeFlow.css';
 
 const STEPS = [
-  { id: 'intro',    label: 'INTRO' },
-  { id: 'identity', label: 'IDENTITY' },
-  { id: 'body',     label: 'BODY' },
-  { id: 'habit',    label: 'BASELINE' },
-  { id: 'activity', label: 'ACTIVITY' },
-  { id: 'review',   label: 'REVIEW' },
-  { id: 'start',    label: 'START' }
+  { id: 'intro',     label: 'INTRO' },
+  { id: 'identity',  label: 'IDENTITY' },
+  { id: 'body',      label: 'BODY' },
+  { id: 'habit',     label: 'BASELINE' },
+  { id: 'activity',  label: 'ACTIVITY' },
+  { id: 'intensity', label: 'INTENSITY' },
+  { id: 'diet',      label: 'DIET' },
+  { id: 'review',    label: 'REVIEW' },
+  { id: 'start',     label: 'START' }
 ];
 
 export default function WelcomeFlow() {
@@ -94,6 +97,12 @@ export default function WelcomeFlow() {
           {step.id === 'activity' && (
             <ActivityStep profile={profile} setProfile={setProfile} />
           )}
+          {step.id === 'intensity' && (
+            <IntensityStep profile={profile} setProfile={setProfile} />
+          )}
+          {step.id === 'diet' && (
+            <DietStep profile={profile} setProfile={setProfile} />
+          )}
           {step.id === 'review' && <ReviewStep profile={profile} />}
           {step.id === 'start' && <StartStep onStart={startProtocol} />}
         </motion.div>
@@ -130,6 +139,8 @@ function validate(id, p, scratch) {
   }
   if (id === 'habit') return true; // all optional
   if (id === 'activity') return !!p.activity;
+  if (id === 'intensity') return !!p.intensity;
+  if (id === 'diet') return !!(p.diet && p.diet.type);
   return true;
 }
 
@@ -381,6 +392,94 @@ function ActivityStep({ profile, setProfile }) {
   );
 }
 
+function IntensityStep({ profile, setProfile }) {
+  return (
+    <>
+      <h2 className="wf-h2">INTENSITY</h2>
+      <p className="wf-lede-sm">
+        How aggressive is the calorie deficit? Standard is sustainable for 120 days.
+        Aggressive gets there faster but costs you in hunger and training output.
+      </p>
+      <div className="wf-stack">
+        {INTENSITY_OPTIONS.map((o) => (
+          <button
+            key={o.k}
+            className={`wf-row-pick ${profile.intensity === o.k ? 'on' : ''}`}
+            onClick={() => setProfile({ intensity: o.k })}
+            type="button"
+          >
+            <div className="wf-row-l">
+              <div className="wf-row-t">{o.label}</div>
+              <div className="wf-row-d">{o.note}</div>
+              <div className="wf-row-d" style={{ marginTop: 4, color: 'var(--fg-dim)' }}>{o.detail}</div>
+            </div>
+            <div className="wf-row-r">−{o.deficit} KC</div>
+          </button>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function DietStep({ profile, setProfile }) {
+  const diet = profile.diet || { type: 'non-veg', onionGarlic: true, noDairy: false };
+  const set = (patch) => setProfile({ diet: { ...diet, ...patch } });
+
+  return (
+    <>
+      <h2 className="wf-h2">DIET</h2>
+      <p className="wf-lede-sm">Filters the meal library. You can change this later from the menu.</p>
+
+      <div className="wf-field">
+        <label className="wf-lbl">DIET TYPE</label>
+        <div className="wf-stack">
+          {DIET_TYPES.map((d) => (
+            <button
+              key={d.k}
+              className={`wf-row-pick ${diet.type === d.k ? 'on' : ''}`}
+              onClick={() => set({ type: d.k })}
+              type="button"
+            >
+              <div className="wf-row-l">
+                <div className="wf-row-t">{d.label}</div>
+                <div className="wf-row-d">{d.note}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="wf-field">
+        <label className="wf-lbl">OPTIONS</label>
+        <div className="wf-stack">
+          <button
+            type="button"
+            className={`wf-row-pick ${diet.onionGarlic === false ? 'on' : ''}`}
+            onClick={() => set({ onionGarlic: !(diet.onionGarlic === false) ? false : true })}
+          >
+            <div className="wf-row-l">
+              <div className="wf-row-t">NO ONION / GARLIC</div>
+              <div className="wf-row-d">Hides items that contain either</div>
+            </div>
+            <div className="wf-row-r">{diet.onionGarlic === false ? 'ON' : 'OFF'}</div>
+          </button>
+          <button
+            type="button"
+            className={`wf-row-pick ${diet.noDairy ? 'on' : ''}`}
+            onClick={() => set({ noDairy: !diet.noDairy })}
+          >
+            <div className="wf-row-l">
+              <div className="wf-row-t">LACTOSE-FREE</div>
+              <div className="wf-row-d">Hides dairy — paneer, milk, curd, ghee</div>
+            </div>
+            <div className="wf-row-r">{diet.noDairy ? 'ON' : 'OFF'}</div>
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 function ReviewStep({ profile }) {
   const age = ageFrom(profile.dob);
   const b = bmr({
@@ -394,28 +493,35 @@ function ReviewStep({ profile }) {
   const bmiVal = bmi(profile);
   const bmiT = bmiTier(bmiVal);
 
+  const intensityLabel = profile.intensity === 'aggressive' ? 'AGGRESSIVE' : 'STANDARD';
+  const dietLabel = (profile.diet?.type || 'non-veg').toUpperCase()
+    + (profile.diet?.onionGarlic === false ? ' · NO O/G' : '')
+    + (profile.diet?.noDairy ? ' · NO DAIRY' : '');
+
   return (
     <>
       <h2 className="wf-h2">TARGETS</h2>
       <p className="wf-lede-sm">Computed from your inputs. You can edit body metrics any time in the LOG tab.</p>
 
       <div className="wf-review">
-        <Row l="NAME"    v={profile.name || '—'} />
-        <Row l="SEX"     v={profile.sex?.toUpperCase() || '—'} />
-        <Row l="AGE"     v={age != null ? `${age}` : '—'} />
-        <Row l="HEIGHT"  v={profile.heightCm ? `${profile.heightCm} CM` : '—'} />
-        <Row l="WEIGHT"  v={profile.startWeightKg ? `${profile.startWeightKg} KG` : '—'} />
-        <Row l="GOAL"    v={profile.goalWeightKg ? `${profile.goalWeightKg} KG` : '—'}
+        <Row l="NAME"      v={profile.name || '—'} />
+        <Row l="SEX"       v={profile.sex?.toUpperCase() || '—'} />
+        <Row l="AGE"       v={age != null ? `${age}` : '—'} />
+        <Row l="HEIGHT"    v={profile.heightCm ? `${profile.heightCm} CM` : '—'} />
+        <Row l="WEIGHT"    v={profile.startWeightKg ? `${profile.startWeightKg} KG` : '—'} />
+        <Row l="GOAL"      v={profile.goalWeightKg ? `${profile.goalWeightKg} KG` : '—'}
              delta={(profile.startWeightKg && profile.goalWeightKg)
                ? `Δ ${(profile.goalWeightKg - profile.startWeightKg).toFixed(1)} KG` : null} />
-        <Row l="BMI"     v={bmiVal != null ? bmiVal.toFixed(1) : '—'} tone={bmiT.tone} sub={bmiT.label} />
+        <Row l="BMI"       v={bmiVal != null ? bmiVal.toFixed(1) : '—'} tone={bmiT.tone} sub={bmiT.label} />
+        <Row l="INTENSITY" v={intensityLabel} sub={`−${win.deficit} kcal/day`} tone={profile.intensity === 'aggressive' ? 'warn' : ''} />
+        <Row l="DIET"      v={dietLabel} />
       </div>
 
       <div className="wf-subtitle">DERIVED</div>
       <div className="wf-review">
         <Row l="BMR"          v={b ? `${b} KCAL` : '—'} sub="baseline burn" />
         <Row l="TDEE"         v={t ? `${t} KCAL` : '—'} sub="with activity" />
-        <Row l="KCAL WINDOW"  v={`${win.lo}–${win.hi}`} sub="~500 kcal deficit" tone="ok" />
+        <Row l="KCAL WINDOW"  v={`${win.lo}–${win.hi}`} sub={`~${win.deficit} kcal deficit`} tone="ok" />
         <Row l="PROTEIN TGT"  v={`${protein} G / DAY`} sub="1.8 g/kg bodyweight" tone="ok" />
       </div>
     </>

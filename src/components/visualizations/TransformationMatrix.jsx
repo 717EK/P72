@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { TOTAL_DAYS, MILESTONES } from '../../utils/constants';
 import { addDays, dateKey, parseKey, daysBetween } from '../../utils/dates';
 import { scoreDay, complianceTier } from '../../utils/scoring';
+import { calorieWindow, slotBudgets, proteinTargetG, ageFrom } from '../../utils/health';
 import './TransformationMatrix.css';
 
 const COLS = 18;
@@ -12,7 +13,25 @@ export default function TransformationMatrix({ onDayClick }) {
   const startDate = useAppStore((s) => s.startDate);
   const days = useAppStore((s) => s.days);
   const activeDay = useAppStore((s) => s.activeDay);
+  const profile = useAppStore((s) => s.profile);
   const scrollerRef = useRef(null);
+
+  // Pre-compute scoring options from profile so every cell scores with the
+  // user's personalised rubric, not the conservative defaults.
+  const scoreOptions = useMemo(() => {
+    const age = ageFrom(profile?.dob);
+    const pForWindow = {
+      sex: profile?.sex, weightKg: profile?.startWeightKg,
+      heightCm: profile?.heightCm, ageYears: age,
+      activity: profile?.activity, intensity: profile?.intensity
+    };
+    return {
+      slotBudgets: slotBudgets(pForWindow),
+      proteinTarget: proteinTargetG({ weightKg: profile?.startWeightKg })
+    };
+  }, [profile]);
+
+  if (!startDate) return null;
   const todayIdx = daysBetween(parseKey(startDate), parseKey(activeDay));
 
   useEffect(() => {
@@ -65,7 +84,7 @@ export default function TransformationMatrix({ onDayClick }) {
               const future = idx > todayIdx;
               const isToday = idx === todayIdx;
               let tier = 'empty';
-              if (dat && !future) tier = complianceTier(scoreDay(dat).pct);
+              if (dat && !future) tier = complianceTier(scoreDay(dat, scoreOptions).pct);
               if (future) tier = 'future';
               return (
                 <button

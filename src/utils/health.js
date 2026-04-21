@@ -31,14 +31,41 @@ export const tdee = (profile) => {
   return Math.round(b * f);
 };
 
-// Returns { lo, hi } kcal window for a sensible cut (~500 kcal deficit, floored at 1200/1400)
+// Returns { lo, hi, center, deficit } kcal window.
+// intensity: 'standard' (-500) or 'aggressive' (-750). Falls back to standard.
 export const calorieWindow = (profile) => {
   const t = tdee(profile);
-  if (t == null) return { lo: 1400, hi: 1650 }; // legacy default
-  const target = t - 500;
-  const floor = profile.sex === 'female' ? 1200 : 1400;
+  const intensity = profile?.intensity || 'standard';
+  const deficit = intensity === 'aggressive' ? 750 : 500;
+  if (t == null) {
+    // Safe default when stats missing
+    const lo = intensity === 'aggressive' ? 1300 : 1400;
+    return { lo, hi: lo + 250, center: lo + 125, deficit };
+  }
+  const target = t - deficit;
+  const floor = profile?.sex === 'female'
+    ? (intensity === 'aggressive' ? 1100 : 1200)
+    : (intensity === 'aggressive' ? 1300 : 1400);
   const center = Math.max(floor, target);
-  return { lo: center - 125, hi: center + 125 };
+  return { lo: center - 125, hi: center + 125, center, deficit };
+};
+
+// Per-slot kcal budget. Default split M 22% · L 33% · E 13% · D 32%.
+// Returns { M, L, E, D } each = { lo, hi, center }.
+export const slotBudgets = (profile, split = { M: 0.22, L: 0.33, E: 0.13, D: 0.32 }) => {
+  const win = calorieWindow(profile);
+  const centerTotal = win.center;
+  const slotPct = 0.15; // ±15% tolerance per slot
+  const out = {};
+  for (const k of Object.keys(split)) {
+    const center = Math.round(centerTotal * split[k]);
+    out[k] = {
+      center,
+      lo: Math.round(center * (1 - slotPct)),
+      hi: Math.round(center * (1 + slotPct))
+    };
+  }
+  return out;
 };
 
 // Protein target in grams (1.8 g/kg bodyweight, a defensible middle for a cut)

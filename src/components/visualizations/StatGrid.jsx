@@ -2,10 +2,10 @@ import React from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import {
   scoreDay, kcalForDay, calcStreakForgiving,
-  forgivenessRemaining, firstLoggedWeight, rollingAvg
+  forgivenessRemaining, firstLoggedWeight, rollingAvg, proteinForDay
 } from '../../utils/scoring';
 import { TOTAL_DAYS } from '../../utils/constants';
-import { calorieWindow, ageFrom } from '../../utils/health';
+import { calorieWindow, slotBudgets, proteinTargetG, ageFrom } from '../../utils/health';
 import './StatGrid.css';
 
 export default function StatGrid() {
@@ -16,14 +16,24 @@ export default function StatGrid() {
   const dayNum = useAppStore((s) => s.currentDayNumber());
   const profile = useAppStore((s) => s.profile);
 
-  const sc = scoreDay(day);
+  const age = ageFrom(profile?.dob);
+  const pForWindow = {
+    sex: profile?.sex, weightKg: profile?.startWeightKg,
+    heightCm: profile?.heightCm, ageYears: age,
+    activity: profile?.activity, intensity: profile?.intensity
+  };
+  const kcalWin = calorieWindow(pForWindow);
+  const budgets = slotBudgets(pForWindow);
+  const proteinTarget = proteinTargetG({ weightKg: profile?.startWeightKg });
+  const scoreOptions = { slotBudgets: budgets, proteinTarget };
+
+  const sc = scoreDay(day, scoreOptions);
   const kc = kcalForDay(day);
+  const pToday = proteinForDay(day);
 
-  // Streak + forgiveness
-  const streak = calcStreakForgiving(days, activeDay);
-  const savesLeft = forgivenessRemaining(days, activeDay);
+  const streak = calcStreakForgiving(days, activeDay, { scoreOptions });
+  const savesLeft = forgivenessRemaining(days, activeDay, { scoreOptions });
 
-  // Prefer the user's profile starting weight; fall back to first-logged.
   const baselineW = profile?.startWeightKg || firstLoggedWeight(days);
   const curW = day.metrics.weight;
   const wDelta = (baselineW != null && curW != null) ? (curW - baselineW) : null;
@@ -31,24 +41,16 @@ export default function StatGrid() {
   const smoke7 = rollingAvg(days, startDate, activeDay, 'smoke', 7);
   const steps7 = rollingAvg(days, startDate, activeDay, 'steps', 7);
 
-  // Personalized kcal window from BMR/TDEE
-  const age = ageFrom(profile?.dob);
-  const kcalWin = calorieWindow({
-    sex: profile?.sex,
-    weightKg: profile?.startWeightKg,
-    heightCm: profile?.heightCm,
-    ageYears: age,
-    activity: profile?.activity
-  });
   const kcalTone =
     kc === 0 ? '' :
     (kc >= kcalWin.lo && kc <= kcalWin.hi) ? 'ok' :
-    kc > kcalWin.hi + 100 ? 'bad' : 'warn';
+    kc > kcalWin.hi + 150 ? 'bad' : 'warn';
 
   const stats = [
     { lbl: 'DAY', val: `${dayNum} / ${TOTAL_DAYS}`, tone: '' },
     { lbl: 'COMPLIANCE', val: `${sc.pct}%`, tone: sc.pct >= 80 ? 'ok' : sc.pct >= 50 ? 'warn' : 'bad' },
-    { lbl: `KCAL · TGT ${kcalWin.lo}-${kcalWin.hi}`, val: kc, tone: kcalTone },
+    { lbl: `KCAL · ${kcalWin.lo}-${kcalWin.hi}`, val: kc, tone: kcalTone },
+    { lbl: `PROTEIN · TGT ${proteinTarget}g`, val: `${pToday}g`, tone: pToday >= proteinTarget ? 'ok' : pToday >= proteinTarget * 0.8 ? 'warn' : '' },
     { lbl: 'WEIGHT Δ', val: wDelta == null ? '—' : ((wDelta >= 0 ? '+' : '') + wDelta.toFixed(1) + ' KG'), tone: wDelta == null ? '' : wDelta < 0 ? 'ok' : wDelta > 0 ? 'bad' : '' },
     { lbl: 'STREAK', val: `${streak}D`, tone: streak >= 3 ? 'ok' : '' },
     { lbl: 'SAVES LEFT 28D', val: `${savesLeft}/2`, tone: savesLeft === 0 ? 'bad' : savesLeft === 1 ? 'warn' : 'ok' },

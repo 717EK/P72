@@ -3,14 +3,15 @@ import NumericInput from '../ui/NumericInput';
 import { useAppStore } from '../../store/useAppStore';
 import { METRIC_TARGETS } from '../../utils/constants';
 import { proteinTargetG } from '../../utils/health';
+import { proteinForDay } from '../../utils/scoring';
 
 export default function BodyMetrics() {
   const day = useAppStore((s) => s.getCurrentDay());
   const setMetric = useAppStore((s) => s.setMetric);
   const profile = useAppStore((s) => s.profile);
 
-  // Target uses the user's starting weight; falls back to the app's default.
-  const proteinG = proteinTargetG({ weightKg: profile?.startWeightKg });
+  const proteinTgt = proteinTargetG({ weightKg: profile?.startWeightKg });
+  const fromMeals = proteinForDay(day) - (day.metrics.proteinG || 0);
   const goal = profile?.goalWeightKg || METRIC_TARGETS.weight;
 
   return (
@@ -61,14 +62,14 @@ export default function BodyMetrics() {
         onChange={(v) => setMetric('water', v)}
       />
       <NumericInput
-        label="Protein"
-        target={`TGT ${proteinG} G · 1.8 G/KG`}
+        label="Protein extras"
+        target={`MEALS: ${fromMeals}g · TGT ${proteinTgt}g · supplements only`}
         unit="G"
         step={5}
         min={0}
-        max={400}
+        max={200}
         value={day.metrics.proteinG}
-        okWhen={(v) => v >= proteinG}
+        okWhen={() => true}
         onChange={(v) => setMetric('proteinG', v)}
       />
       <NumericInput

@@ -6,13 +6,27 @@
 
 ## What's new in this build
 
-- **Welcome / onboarding flow** — collects name, sex, DOB, height, starting weight, goal weight (default 72 kg, editable), smoking baseline, and activity level. Derives BMR, TDEE, a personalized calorie window (~500 kcal deficit, floored at 1200/1400), and a protein target (1.8 g/kg).
-- **Explicit START PROTOCOL** — user picks today or tomorrow as Day 1. Tomorrow is the default and shows a countdown screen until midnight. Day number is 0 until the protocol starts.
-- **Apple Health import** — PWAs can't read HealthKit directly. The LOG tab has a sync panel that accepts two file formats: JSON from the *Health Auto Export* iOS app, or `export.xml` from Apple's built-in Health data export. Imported step counts only overwrite logged values that are lower.
-- **Protein as grams, not a flag** — the `Hit protein ≥120g` checkbox is replaced by a number input. The 1/25 score point for protein is still awarded, auto-derived from grams vs. target.
-- **Forgiveness mechanic** — the streak counter now allows 2 missed days per rolling 28-day window before breaking. The DASH shows a `SAVES LEFT 28D` stat alongside streak.
-- **Personalized kcal window + weight Δ** — DASH stats now reflect the user's own calorie target and use profile starting weight for weight delta.
-- **Menu: RESTART SETUP** — soft reset that clears profile + start date but keeps logged days. Separate from WIPE ALL.
+**Phase A — dynamic meal picker + BMR-aware targets**
+
+- **Intensity toggle in onboarding** — Standard (−500 kcal) or Aggressive (−750 kcal). Floors prevent dropping below safe minimums (1300 kcal male / 1100 kcal female on aggressive).
+- **Dietary profile** — Non-veg / Eggitarian / Vegetarian / Vegan / Jain, plus no-onion-garlic and lactose-free toggles. Filters the whole meal library.
+- **Indian meal library** — 119 items with kcal + protein. Per-slot preference hints (what's a breakfast vs. dinner item), dietary tags, portion sizes.
+- **Per-slot meal picker** — FUEL tab now shows four cards (Morning / Lunch / Evening / Dinner), each with a kcal budget derived from the user's BMR. Tap `+ ADD ITEM` → bottom-sheet picker with search, FAV / RECENT / ALL tabs, strict-slot filter, star-to-favorite, and a "custom item" form with optional save-to-library.
+- **Per-slot budgets** — default split 22 / 33 / 13 / 32% of daily kcal target, ±15% tolerance. Slot card left-border and bar change color as you fill up: green (in range) → amber (over) → red (way over).
+- **Quantity steppers** — every logged item has ± 0.5 steppers so you can log ½ roti or 2× eggs without re-adding.
+- **Android haptic feedback** — tiny buzz on add / stepper actions. No-op on iOS (Apple blocks the Vibration API for PWAs; fix migrates automatically if wrapped in Capacitor).
+- **New 25-point compliance rubric** — 7 skin + 4 slot-kcal + 3 slots-logged + 3 protein tiers + 2 flags + 5 metrics + 1 workout. Goal-aware, not tick-counting.
+- **Protein from meals** — automatically summed from logged items. The LOG-tab "Protein" input is now for supplements / extras only (shows how many grams came from meals right in the label).
+- **Store migration v2 → v3** — existing users' 120-day history is preserved. Legacy boolean meal checkboxes are converted into the new slot-array shape using a mapping table so past compliance scores still make sense.
+
+**Phase A carries over from previous builds:**
+
+- Welcome / onboarding flow (name, sex, DOB, height, starting weight, goal weight, smoking baseline, activity level)
+- Explicit START PROTOCOL — today or tomorrow as Day 1 with midnight countdown
+- Apple Health step-count import (Health Auto Export JSON or raw Apple Health XML)
+- Forgiveness mechanic — 2 free misses per rolling 28-day window preserve the streak
+- Personalized kcal window + profile-based weight delta
+- Menu: RESTART SETUP (soft reset keeps logged days)
 
 ---
 

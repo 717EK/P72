@@ -1,22 +1,57 @@
 import React from 'react';
-import MealTracker from './MealTracker';
-import DietFlags from './DietFlags';
 import { useAppStore } from '../../store/useAppStore';
-import { kcalForDay, mealProgress } from '../../utils/scoring';
+import { kcalForDay, proteinForDay } from '../../utils/scoring';
+import { calorieWindow, slotBudgets, ageFrom, proteinTargetG } from '../../utils/health';
+import { MEAL_SLOTS } from '../../data/indianMeals';
+import MealSlotCard from './MealSlotCard';
+import DietFlags from './DietFlags';
 
 export default function FuelView() {
   const day = useAppStore((s) => s.getCurrentDay());
-  const kc = kcalForDay(day);
-  const { done, max } = mealProgress(day);
-  const kcalTone = kc >= 1400 && kc <= 1650 ? 'ok' : kc > 1700 ? 'bad' : kc === 0 ? '' : 'warn';
+  const profile = useAppStore((s) => s.profile);
+
+  const age = ageFrom(profile.dob);
+  const pForWindow = {
+    sex: profile.sex, weightKg: profile.startWeightKg,
+    heightCm: profile.heightCm, ageYears: age,
+    activity: profile.activity, intensity: profile.intensity
+  };
+  const win = calorieWindow(pForWindow);
+  const budgets = slotBudgets(pForWindow);
+  const proteinGoal = proteinTargetG({ weightKg: profile.startWeightKg });
+
+  const kcTotal = kcalForDay(day);
+  const pTotal = proteinForDay(day);
+
+  const kcalTone =
+    kcTotal === 0 ? '' :
+    kcTotal >= win.lo && kcTotal <= win.hi ? 'ok' :
+    kcTotal > win.hi + 150 ? 'bad' : 'warn';
 
   return (
     <section>
       <div className="section-title">
-        <span>FUEL // DIET_COMPLIANCE</span>
-        <span className={`tag ${kcalTone}`}>{kc} / 1500–1600 KCAL · {done}/{max}</span>
+        <span>FUEL // DIET</span>
+        <span className={`tag ${kcalTone}`}>
+          {kcTotal} / {win.lo}–{win.hi} KC · {pTotal}/{proteinGoal}g P
+        </span>
       </div>
-      <MealTracker />
+
+      <div style={{ padding: '4px 18px 8px', fontSize: 10, color: 'var(--mute)', letterSpacing: '0.2em', fontWeight: 700 }}>
+        INTENSITY: {profile.intensity === 'aggressive' ? '↓ 750 KC (AGGRESSIVE)' : '↓ 500 KC (STANDARD)'}
+        {profile.diet?.type && ` · ${profile.diet.type.toUpperCase()}`}
+        {profile.diet?.onionGarlic === false && ' · NO-ONION-GARLIC'}
+      </div>
+
+      {MEAL_SLOTS.map((s) => (
+        <MealSlotCard
+          key={s.k}
+          slot={s.k}
+          title={s.title}
+          budget={budgets[s.k]}
+        />
+      ))}
+
       <DietFlags />
     </section>
   );
