@@ -7,6 +7,7 @@ import './TopBar.css';
 export default function TopBar() {
   const dayNum = useAppStore((s) => s.currentDayNumber());
   const activeDay = useAppStore((s) => s.activeDay);
+  const name = useAppStore((s) => s.profile?.name);
   const exportData = useAppStore((s) => s.exportData);
   const importData = useAppStore((s) => s.importData);
   const resetAll = useAppStore((s) => s.resetAll);
@@ -64,6 +65,21 @@ export default function TopBar() {
     e.target.value = '';
   };
 
+  const onRestart = () => {
+    if (!confirm('RESTART SETUP? PROFILE AND START DATE WILL BE CLEARED. LOGGED DAYS ARE KEPT.')) return;
+    // Soft reset — clear onboarding + start date only, keep day logs.
+    // We use importData with a shaped payload to achieve this cleanly.
+    const current = exportData();
+    importData({
+      start: null,
+      days: current.days,
+      profile: null,
+      onboarded: false
+    });
+    toast('SETUP RESET', 'warn');
+    setMenu(false);
+  };
+
   const onReset = () => {
     if (!confirm('WIPE ALL DATA? 120-DAY HISTORY WILL BE ERASED.')) return;
     if (!confirm('CONFIRM AGAIN. THIS CANNOT BE UNDONE.')) return;
@@ -72,17 +88,22 @@ export default function TopBar() {
     setMenu(false);
   };
 
+  const dayLabel = dayNum > 0 ? `D${String(dayNum).padStart(3, '0')}` : 'D000';
+  const firstName = (name || '').trim().split(/\s+/)[0].toUpperCase();
+
   return (
     <header className="top">
       <div className="top-l">
         <div className="top-brand">
           PROTOCOL_<span className="u-ok">72</span>
         </div>
-        <div className="top-sub">120-DAY · STRICT REGIMEN</div>
+        <div className="top-sub">
+          {firstName ? <>HEY, <span className="u-ok">{firstName}</span> · 120-DAY</> : '120-DAY · STRICT REGIMEN'}
+        </div>
       </div>
 
       <div className="top-r">
-        <div className="top-day">D{String(dayNum).padStart(3, '0')}</div>
+        <div className="top-day">{dayLabel}</div>
         <div className="top-meta">
           <div className="top-date">{formatDate(parseKey(activeDay))}</div>
           <div className="top-clock u-tabular">{clock}</div>
@@ -95,6 +116,7 @@ export default function TopBar() {
             <div className="top-menu">
               <button onClick={onExport}>EXPORT JSON</button>
               <button onClick={onImport}>IMPORT JSON</button>
+              <button onClick={onRestart}>RESTART SETUP</button>
               <button className="danger" onClick={onReset}>WIPE ALL</button>
             </div>
           )}

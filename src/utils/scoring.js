@@ -14,7 +14,7 @@ export const blankDay = () => ({
     d_protein: false, d_veg: false
   },
   flags: { zeroSugar: false, zeroOil: false, proteinHit: false },
-  metrics: { weight: null, steps: null, sleep: null, water: null, smoke: null },
+  metrics: { weight: null, steps: null, sleep: null, water: null, smoke: null, proteinG: null },
   activity: { workout: false, cardio: false, stretch: false }
 });
 
@@ -87,6 +87,57 @@ export const calcStreak = (days, todayK) => {
     if (count > 365) break;
   }
   return count;
+};
+
+// Forgiveness-aware streak: allows up to `allowedMisses` missed days in the
+// current rolling `window` of calendar days (default 2 misses per 28 days).
+// Walks backward from today, counting compliant days. A miss is tolerated iff
+// it would not bring the miss count inside the last `window` days above the cap.
+export const calcStreakForgiving = (days, todayK, opts = {}) => {
+  const { threshold = 70, allowedMisses = 2, window = 28 } = opts;
+  let count = 0;
+  let cursor = parseKey(todayK);
+  const missDates = []; // offsets-from-today where a miss was consumed
+  let offset = 0;
+  while (offset < 365) {
+    const k = dateKey(cursor);
+    const dat = days[k];
+    const sc = scoreDay(dat);
+    const compliant = dat && sc.pct >= threshold;
+    if (compliant) {
+      count++;
+    } else {
+      // Trim out misses older than `window` days — they don't count against us.
+      const stillInWindow = missDates.filter((o) => offset - o < window);
+      if (stillInWindow.length < allowedMisses) {
+        stillInWindow.push(offset);
+        missDates.length = 0;
+        missDates.push(...stillInWindow);
+        count++; // "free" miss still extends the streak
+      } else {
+        break;
+      }
+    }
+    cursor = addDays(cursor, -1);
+    offset++;
+  }
+  return count;
+};
+
+// How many forgiveness "saves" are left in the current 28-day window.
+export const forgivenessRemaining = (days, todayK, opts = {}) => {
+  const { threshold = 70, allowedMisses = 2, window = 28 } = opts;
+  let used = 0;
+  let cursor = parseKey(todayK);
+  for (let i = 0; i < window; i++) {
+    const k = dateKey(cursor);
+    const dat = days[k];
+    const sc = scoreDay(dat);
+    // Only count missed days that actually had the chance to be logged
+    if (dat && sc.pct < threshold) used++;
+    cursor = addDays(cursor, -1);
+  }
+  return Math.max(0, allowedMisses - used);
 };
 
 export const firstLoggedWeight = (days) => {

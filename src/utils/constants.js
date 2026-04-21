@@ -41,10 +41,11 @@ export const MEAL_GROUPS = [
   }
 ];
 
+// proteinHit is retained for back-compat with old data, but the UI now logs
+// protein in grams (see BodyMetrics) and derives proteinHit from the target.
 export const DIET_FLAGS = [
   { k: 'zeroSugar', t: 'Zero sugar' },
-  { k: 'zeroOil', t: 'Zero oily / fried food' },
-  { k: 'proteinHit', t: 'Hit protein target (≥120 g)' }
+  { k: 'zeroOil', t: 'Zero oily / fried food' }
 ];
 
 export const ACTIVITY_TOGGLES = [

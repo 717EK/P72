@@ -9,6 +9,8 @@ import SkincareView from './components/skincare/SkincareView';
 import FuelView from './components/diet/FuelView';
 import LogView from './components/metrics/LogView';
 import ToastHost, { toast } from './components/ui/Toast';
+import WelcomeFlow from './components/onboarding/WelcomeFlow';
+import PreStart from './components/onboarding/PreStart';
 import './styles/global.css';
 
 const VIEWS = {
@@ -19,6 +21,8 @@ const VIEWS = {
 };
 
 export default function App() {
+  const onboarded = useAppStore((s) => s.onboarded);
+  const isPreStart = useAppStore((s) => s.isPreStart());
   const activeTab = useAppStore((s) => s.activeTab);
   const rolloverIfNeeded = useAppStore((s) => s.rolloverIfNeeded);
   const ActiveView = VIEWS[activeTab] || DashView;
@@ -51,6 +55,26 @@ export default function App() {
       window.removeEventListener('focus', onVis);
     };
   }, [rolloverIfNeeded]);
+
+  // Not onboarded yet → full-screen welcome flow
+  if (!onboarded) {
+    return (
+      <>
+        <WelcomeFlow />
+        <ToastHost />
+      </>
+    );
+  }
+
+  // Onboarded but start date is in the future → pre-start screen
+  if (isPreStart) {
+    return (
+      <>
+        <PreStart />
+        <ToastHost />
+      </>
+    );
+  }
 
   return (
     <div className="app-shell">

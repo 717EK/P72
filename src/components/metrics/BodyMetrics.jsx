@@ -2,17 +2,23 @@ import React from 'react';
 import NumericInput from '../ui/NumericInput';
 import { useAppStore } from '../../store/useAppStore';
 import { METRIC_TARGETS } from '../../utils/constants';
+import { proteinTargetG } from '../../utils/health';
 
 export default function BodyMetrics() {
   const day = useAppStore((s) => s.getCurrentDay());
   const setMetric = useAppStore((s) => s.setMetric);
+  const profile = useAppStore((s) => s.profile);
+
+  // Target uses the user's starting weight; falls back to the app's default.
+  const proteinG = proteinTargetG({ weightKg: profile?.startWeightKg });
+  const goal = profile?.goalWeightKg || METRIC_TARGETS.weight;
 
   return (
     <div>
       <div className="subhead">Body metrics</div>
       <NumericInput
         label="Weight"
-        target="TGT 72.0 KG · 0.5–0.8 KG / WK"
+        target={`TGT ${goal.toFixed(1)} KG · 0.5–0.8 KG / WK`}
         unit="KG"
         step={0.1}
         min={40}
@@ -55,8 +61,19 @@ export default function BodyMetrics() {
         onChange={(v) => setMetric('water', v)}
       />
       <NumericInput
+        label="Protein"
+        target={`TGT ${proteinG} G · 1.8 G/KG`}
+        unit="G"
+        step={5}
+        min={0}
+        max={400}
+        value={day.metrics.proteinG}
+        okWhen={(v) => v >= proteinG}
+        onChange={(v) => setMetric('proteinG', v)}
+      />
+      <NumericInput
         label="Cigarettes"
-        target="GOAL: TAPER → 0"
+        target={profile?.smokeBaseline ? `BASELINE ${profile.smokeBaseline} → 0` : 'GOAL: TAPER → 0'}
         unit="CIGS"
         step={1}
         min={0}

@@ -4,6 +4,18 @@
 
 ---
 
+## What's new in this build
+
+- **Welcome / onboarding flow** — collects name, sex, DOB, height, starting weight, goal weight (default 72 kg, editable), smoking baseline, and activity level. Derives BMR, TDEE, a personalized calorie window (~500 kcal deficit, floored at 1200/1400), and a protein target (1.8 g/kg).
+- **Explicit START PROTOCOL** — user picks today or tomorrow as Day 1. Tomorrow is the default and shows a countdown screen until midnight. Day number is 0 until the protocol starts.
+- **Apple Health import** — PWAs can't read HealthKit directly. The LOG tab has a sync panel that accepts two file formats: JSON from the *Health Auto Export* iOS app, or `export.xml` from Apple's built-in Health data export. Imported step counts only overwrite logged values that are lower.
+- **Protein as grams, not a flag** — the `Hit protein ≥120g` checkbox is replaced by a number input. The 1/25 score point for protein is still awarded, auto-derived from grams vs. target.
+- **Forgiveness mechanic** — the streak counter now allows 2 missed days per rolling 28-day window before breaking. The DASH shows a `SAVES LEFT 28D` stat alongside streak.
+- **Personalized kcal window + weight Δ** — DASH stats now reflect the user's own calorie target and use profile starting weight for weight delta.
+- **Menu: RESTART SETUP** — soft reset that clears profile + start date but keeps logged days. Separate from WIPE ALL.
+
+---
+
 ## Stack
 
 | Concern | Choice |
