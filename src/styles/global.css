@@ -1,14 +1,32 @@
+/* =========================================================================
+   PROTOCOL_72 · GLOBAL STYLES + DESIGN TOKENS
+
+   The :root block defines every token any theme can override. The defaults
+   here match the brutalist "TERMINAL" theme so nothing breaks when no
+   data-theme is set. Themes live in themes.css and re-declare the same
+   tokens + a small number of component-level overrides where a pure token
+   swap can't capture the look (e.g. glassmorphism needs backdrop-filter).
+   ========================================================================= */
+
 :root {
+  /* ---- Surfaces ---- */
   --bg: #0a0a0a;
   --bg-panel: #111111;
   --bg-elev: #171717;
   --bg-hi: #1f1f1f;
+
+  /* ---- Foreground ---- */
   --fg: #f0f0f0;
   --fg-dim: #9a9a9a;
   --mute: #666666;
   --dim: #333333;
+
+  /* ---- Lines ---- */
   --line: #222222;
   --line-hi: #2d2d2d;
+  --line-w: 1px;
+
+  /* ---- Semantic tones ---- */
   --ok: #39ff14;
   --ok-lo: #1a7a08;
   --ok-mid: #2dbd0e;
@@ -16,7 +34,33 @@
   --bad-lo: #5c0318;
   --warn: #ffcc00;
   --info: #00e5ff;
+  --accent: var(--ok);
+  --on-accent: #000000;
+
+  /* ---- Typography ---- */
   --mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, Menlo, Consolas, monospace;
+  --font-body: var(--mono);
+  --font-heading: var(--mono);
+  --font-num: var(--mono);
+  --weight-body: 400;
+  --weight-heading: 900;
+  --case-heading: uppercase;
+  --track-heading: 0.25em;
+  --track-body: 0.02em;
+
+  /* ---- Shape ---- */
+  --radius: 0;
+  --radius-sm: 0;
+  --radius-lg: 0;
+  --radius-pill: 0;
+
+  /* ---- Depth / effects ---- */
+  --shadow: none;
+  --shadow-hi: none;
+  --shadow-glow: none;
+  --blur: 0px;
+
+  /* ---- Layout ---- */
   --nav-h: 64px;
   --top-h: 72px;
   --safe-b: env(safe-area-inset-bottom, 0px);
@@ -28,22 +72,23 @@
 html, body, #root {
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--mono);
+  font-family: var(--font-body);
   font-size: 13px;
   line-height: 1.45;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--track-body);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   overscroll-behavior: none;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 body { overflow-x: hidden; }
 
-::selection { background: var(--ok); color: #000; }
+::selection { background: var(--accent); color: var(--on-accent); }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--dim); }
-::-webkit-scrollbar-thumb:hover { background: var(--ok); }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 button, input, select, textarea {
   font-family: inherit;
@@ -62,7 +107,7 @@ input[type='number']::-webkit-inner-spin-button { -webkit-appearance: none; marg
 a { color: var(--info); text-decoration: none; }
 
 /* utility */
-.mono { font-family: var(--mono); }
+.mono { font-family: var(--font-body); }
 .u-up { text-transform: uppercase; letter-spacing: 0.2em; }
 .u-mute { color: var(--mute); }
 .u-ok { color: var(--ok); }
@@ -70,7 +115,7 @@ a { color: var(--info); text-decoration: none; }
 .u-warn { color: var(--warn); }
 .u-info { color: var(--info); }
 .u-tabular { font-variant-numeric: tabular-nums; }
-.u-900 { font-weight: 900; }
+.u-900 { font-weight: var(--weight-heading); }
 .u-100 { font-weight: 100; }
 
 .app-shell {
@@ -85,11 +130,18 @@ a { color: var(--info); text-decoration: none; }
   padding: 0;
 }
 
+/* ----- Section title -----
+   FIX: previously stuck at top:0 which collided with the sticky top bar
+   (both elements would stack at the same offset and render overlapping
+   text during scroll). Now offset by --top-h so section titles settle
+   flush beneath the header. z-index kept low so the top bar always
+   paints over it. */
 .section-title {
   font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
+  font-weight: var(--weight-heading);
+  letter-spacing: var(--track-heading);
+  text-transform: var(--case-heading);
+  font-family: var(--font-heading);
   padding: 14px 18px 10px;
   border-bottom: 1px solid var(--line);
   display: flex;
@@ -98,7 +150,7 @@ a { color: var(--info); text-decoration: none; }
   gap: 10px;
   background: var(--bg);
   position: sticky;
-  top: 0;
+  top: var(--top-h);
   z-index: 5;
 }
 .section-title .tag {
@@ -119,7 +171,7 @@ a { color: var(--info); text-decoration: none; }
   color: var(--mute);
   margin: 0;
   padding: 12px 18px 6px;
-  border-left: 2px solid var(--ok);
+  border-left: 2px solid var(--accent);
   margin: 14px 18px 6px;
   padding: 4px 0 4px 10px;
 }

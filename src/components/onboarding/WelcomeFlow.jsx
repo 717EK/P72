@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../../store/useAppStore';
 import Button from '../ui/Button';
+import { ThemePickerInline } from '../ui/ThemePicker';
 import { todayKey, parseKey, addDays, dateKey, formatDate } from '../../utils/dates';
 import {
   ACTIVITY_FACTORS, SEX_OPTIONS, bmr, tdee, bmi, bmiTier, ageFrom,
@@ -153,6 +154,12 @@ function IntroStep() {
         120 days. Skin, diet, body, activity.
         One log per day. No backend, no account — everything lives on this device.
       </p>
+
+      {/* Let first-time users pick a look up-front. Change applies live so
+          the rest of the welcome flow is shown in their chosen theme.
+          Also accessible later from the hamburger menu → THEME. */}
+      <ThemePickerInline />
+
       <div className="wf-blocks">
         <div className="wf-block">
           <div className="wf-block-n">01</div>

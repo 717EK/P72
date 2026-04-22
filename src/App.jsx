@@ -12,6 +12,7 @@ import ToastHost, { toast } from './components/ui/Toast';
 import WelcomeFlow from './components/onboarding/WelcomeFlow';
 import PreStart from './components/onboarding/PreStart';
 import './styles/global.css';
+import './styles/themes.css';
 
 const VIEWS = {
   dash: DashView,
@@ -24,8 +25,16 @@ export default function App() {
   const onboarded = useAppStore((s) => s.onboarded);
   const isPreStart = useAppStore((s) => s.isPreStart());
   const activeTab = useAppStore((s) => s.activeTab);
+  const theme = useAppStore((s) => s.theme);
   const rolloverIfNeeded = useAppStore((s) => s.rolloverIfNeeded);
   const ActiveView = VIEWS[activeTab] || DashView;
+
+  // Reflect the theme on <html data-theme="..."> so every CSS selector
+  // scoped under [data-theme="..."] picks it up. Default to 'terminal' for
+  // robustness — if the store hasn't hydrated yet, we still get the stock look.
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme || 'terminal';
+  }, [theme]);
 
   useEffect(() => {
     rolloverIfNeeded();

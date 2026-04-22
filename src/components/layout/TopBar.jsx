@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { formatClock, formatDate, parseKey } from '../../utils/dates';
 import { toast } from '../ui/Toast';
+import ThemePickerSheet from '../ui/ThemePicker';
 import './TopBar.css';
 
 export default function TopBar() {
@@ -14,6 +15,7 @@ export default function TopBar() {
 
   const [clock, setClock] = useState(formatClock(new Date()));
   const [menu, setMenu] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
   const fileRef = useRef(null);
   const menuRef = useRef(null);
 
@@ -114,6 +116,7 @@ export default function TopBar() {
           </button>
           {menu && (
             <div className="top-menu">
+              <button onClick={() => { setMenu(false); setThemeOpen(true); }}>THEME</button>
               <button onClick={onExport}>EXPORT JSON</button>
               <button onClick={onImport}>IMPORT JSON</button>
               <button onClick={onRestart}>RESTART SETUP</button>
@@ -137,6 +140,8 @@ export default function TopBar() {
           style={{ width: `${Math.min(100, (dayNum / 120) * 100)}%` }}
         />
       </div>
+
+      <ThemePickerSheet open={themeOpen} onClose={() => setThemeOpen(false)} />
     </header>
   );
 }

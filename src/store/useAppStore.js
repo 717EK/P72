@@ -46,6 +46,10 @@ const init = () => ({
   activeDay: todayKey(),
   bootedAt: Date.now(),
 
+  // UI theme key — matches [data-theme="..."] selectors in themes.css.
+  // Valid: 'terminal' (default) | 'aurora' | 'kyoto' | 'vapor' | 'forest' | 'clay'.
+  theme: 'terminal',
+
   // Health integration state (last import summary).
   healthSync: {
     lastImportedAt: null,   // ISO string
@@ -61,6 +65,10 @@ export const useAppStore = create(
 
       setActiveTab: (tab) => set({ activeTab: tab }),
       setActiveDay: (key) => set({ activeDay: key }),
+
+      // Switch UI theme. Value must match a [data-theme="..."] rule.
+      // App.jsx reflects this to document.documentElement.dataset.theme.
+      setTheme: (theme) => set({ theme }),
 
       // ---------- Onboarding ----------
       setProfile: (patch) => set((s) => ({ profile: { ...s.profile, ...patch } })),
@@ -339,9 +347,10 @@ export const useAppStore = create(
         startDate: s.startDate,
         days: s.days,
         activeTab: s.activeTab,
-        healthSync: s.healthSync
+        healthSync: s.healthSync,
+        theme: s.theme
       }),
-      version: 3,
+      version: 4,
       migrate: (persisted, fromVersion) => {
         let p = { ...(persisted || {}) };
 
@@ -427,6 +436,12 @@ export const useAppStore = create(
             }
             p.days = migrated;
           }
+        }
+
+        // v3 → v4: new UI theme field — default existing users to TERMINAL
+        // (the original look) so no one gets an unexpected style change.
+        if (fromVersion < 4) {
+          if (!p.theme) p.theme = 'terminal';
         }
 
         return p;
